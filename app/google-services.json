@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "231751772844",
+    "project_id": "home-work-20-2953e",
+    "storage_bucket": "home-work-20-2953e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:231751772844:android:8d9e2f1d6a894e4a0dcd09",
+        "android_client_info": {
+          "package_name": "com.hw20"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-MlUXFPtHxIeqL-4Gx9uH2mZHtovJdyo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

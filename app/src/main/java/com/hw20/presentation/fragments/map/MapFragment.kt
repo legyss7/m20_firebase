@@ -69,14 +69,6 @@ class MapFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-//        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-//            if (!task.isSuccessful) {
-//                Log.w("myLog", "Fetching FCM registration token failed", task.exception)
-//                return@OnCompleteListener
-//            }
-//            Log.d("myLog", task.result)
-//        })
-
         mapView = binding.map
 
         if (isLocationPermissionGranted()) {

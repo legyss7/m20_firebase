@@ -17,14 +17,14 @@ class App : Application() {
         MapKitFactory.setApiKey(API_KEY)
 
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             createNotificationChannel()
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel() {
-        val name = "Notification channel"
-        val descriptionText = "Simple description"
+        val name = getString(R.string.notification_channel)
+        val descriptionText = getString(R.string.simple_description)
         val importance = NotificationManager.IMPORTANCE_DEFAULT
 
         val channel = NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance).apply {

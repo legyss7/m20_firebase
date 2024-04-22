@@ -2,20 +2,28 @@ package com.hw20.presentation.fragments.map
 
 import android.Manifest
 import android.app.AlertDialog
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.hw20.App
 import com.hw20.R
 import com.hw20.databinding.FragmentMapBinding
+import com.hw20.presentation.MainActivity
 import com.yandex.mapkit.Animation
 import com.yandex.mapkit.MapKitFactory
 import com.yandex.mapkit.geometry.Point
@@ -33,6 +41,8 @@ class MapFragment : Fragment() {
     private var latitudeMap = 0.0
     private var longitudeMap = 0.0
     private var zoomMap = 0.0f
+    
+    private val launcher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
 
 
     private lateinit var mapView: MapView
@@ -55,8 +65,18 @@ class MapFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+//        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+//            if (!task.isSuccessful) {
+//                Log.w("myLog", "Fetching FCM registration token failed", task.exception)
+//                return@OnCompleteListener
+//            }
+//            Log.d("myLog", task.result)
+//        })
+
         mapView = binding.map
 
         if (isLocationPermissionGranted()) {
@@ -72,6 +92,7 @@ class MapFragment : Fragment() {
             } else {
                 promptGpsActivation()
             }
+            createNotification(latitudeMap, longitudeMap)
         }
 
         binding.plus.setOnClickListener { changeZoom(+ZOOM_STEP) }
@@ -163,7 +184,6 @@ class MapFragment : Fragment() {
         var networkEnabled = false
         try {
             gpsEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
-            // Генерируем фиктивное исключение для тестирования
 //            if (!gpsEnabled) {
 //                throw RuntimeException("Location providers are disabled")
 //            }
@@ -227,6 +247,35 @@ class MapFragment : Fragment() {
             .show()
     }
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    private fun createNotification(latitude: Double, longitude: Double) {
+        val intent = Intent(requireContext(), MainActivity::class.java)
+        val pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.getActivity(requireContext(), 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        } else {
+            PendingIntent.getActivity(
+                requireContext(),
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
+        val notificationText = "Latitude: $latitude, Longitude: $longitude"
+        val notification = NotificationCompat.Builder(requireContext(), App.NOTIFICATION_CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(getString(R.string.app_name))
+            .setContentText(notificationText)
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+            NotificationManagerCompat.from(requireContext()).notify(NOTIFICATION_ID, notification)
+        } else {
+            launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
     companion object {
         private const val LATITUDE = "latitude"
         private const val LONGITUDE = "longitude"
@@ -234,5 +283,6 @@ class MapFragment : Fragment() {
         private const val ZOOM_STEP = 1f
         private val SMOOTH_ANIMATION = Animation(Animation.Type.SMOOTH, 0.4f)
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1001
+        private const val NOTIFICATION_ID = 1000
     }
 }
